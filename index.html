@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Big Alph">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Display messages one giant letter at a time — perfect for communicating across a room.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192x192.png">
+<title>Big Alph</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --fg: #f0ede6;
+    --accent: #e8c84a;
+    --dim: #333;
+  }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'DM Sans', sans-serif;
+    touch-action: manipulation;
+  }
+
+  /* ── INPUT SCREEN ── */
+  #input-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1;
+  }
+
+  .tagline {
+    font-size: 0.85rem;
+    color: #888;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  textarea {
+    width: 100%;
+    max-width: 480px;
+    height: 9rem;
+    background: #141414;
+    border: 1px solid var(--dim);
+    border-radius: 4px;
+    color: var(--fg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.1rem;
+    padding: 1rem;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: #444; }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .speed-label {
+    font-size: 0.75rem;
+    color: #666;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 2px;
+    background: var(--dim);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .speed-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    color: var(--accent);
+    min-width: 2.2rem;
+    text-align: right;
+    letter-spacing: 0.05em;
+  }
+
+  .go-btn {
+    width: 100%;
+    max-width: 480px;
+    padding: 1rem;
+    background: var(--accent);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .go-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+  /* ── DISPLAY SCREEN ── */
+  #display-screen {
+    display: none;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    background: var(--bg);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #display-screen.active { display: flex; align-items: center; justify-content: center; }
+
+  .letter-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #big-letter {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: min(88vw, 88vh);
+    color: var(--fg);
+    line-height: 1;
+    text-align: center;
+    transition: opacity 0.06s ease;
+    position: relative;
+    z-index: 2;
+    will-change: transform;
+  }
+
+  #big-letter.space-char::before {
+    content: '·';
+    color: #333;
+    font-size: min(88vw, 88vh);
+    line-height: 1;
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #progress-bar {
+    position: fixed;
+    bottom: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.15s linear;
+    z-index: 10;
+  }
+
+  #hud {
+    position: fixed;
+    top: 1rem; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.2rem;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .hud-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    color: #333;
+    letter-spacing: 0.1em;
+  }
+
+  .hud-exit {
+    font-size: 0.7rem;
+    color: #2a2a2a;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    pointer-events: all;
+    cursor: pointer;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #1e1e1e;
+    border-radius: 3px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .hud-exit:active { color: var(--accent); border-color: var(--accent); }
+
+  .tap-zone {
+    position: fixed;
+    top: 0; bottom: 0;
+    width: 50%;
+    z-index: 5;
+  }
+  #tap-prev { left: 0; }
+  #tap-next { right: 0; }
+
+  @keyframes flash-in {
+    0%   { opacity: 0; transform: scale(0.88); }
+    60%  { opacity: 1; transform: scale(1.03); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .flash { animation: flash-in 0.18s ease forwards; }
+
+  #pause-dot {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 20;
+  }
+  #pause-dot.visible { opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<div id="input-screen">
+  <div>
+    <div class="logo">Big Alph</div>
+    <div class="tagline">Communicate across the room</div>
+  </div>
+  <textarea id="msg-input" placeholder="Type your message here…" autofocus></textarea>
+  <div class="controls">
+    <span class="speed-label">Speed</span>
+    <input type="range" id="speed-range" min="1" max="10" value="5">
+    <span class="speed-val" id="speed-val">5</span>
+  </div>
+  <button class="go-btn" id="go-btn">START →</button>
+</div>
+
+<div id="display-screen">
+  <div class="vignette"></div>
+  <div class="letter-wrap">
+    <div id="big-letter"></div>
+  </div>
+  <div id="hud">
+    <span class="hud-count" id="hud-count"></span>
+    <span class="hud-exit" id="hud-exit">✕ EXIT</span>
+  </div>
+  <div id="progress-bar"></div>
+  <div id="pause-dot"></div>
+  <div class="tap-zone" id="tap-prev"></div>
+  <div class="tap-zone" id="tap-next"></div>
+</div>
+
+<script>
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+
+  const inputScreen   = document.getElementById('input-screen');
+  const displayScreen = document.getElementById('display-screen');
+  const msgInput      = document.getElementById('msg-input');
+  const speedRange    = document.getElementById('speed-range');
+  const speedVal      = document.getElementById('speed-val');
+  const goBtn         = document.getElementById('go-btn');
+  const bigLetter     = document.getElementById('big-letter');
+  const hudCount      = document.getElementById('hud-count');
+  const hudExit       = document.getElementById('hud-exit');
+  const progressBar   = document.getElementById('progress-bar');
+  const pauseDot      = document.getElementById('pause-dot');
+  const tapPrev       = document.getElementById('tap-prev');
+  const tapNext       = document.getElementById('tap-next');
+
+  let chars = [], idx = 0, timer = null, paused = false, intervalMs = 800;
+
+  function speedToMs(s) { return Math.round(2000 - (s - 1) * (1850 / 9)); }
+
+  speedRange.addEventListener('input', () => {
+    speedVal.textContent = speedRange.value;
+    intervalMs = speedToMs(+speedRange.value);
+    if (timer && !paused) restartTimer();
+  });
+
+  goBtn.addEventListener('click', startDisplay);
+  msgInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); startDisplay(); }
+  });
+
+  function startDisplay() {
+    const raw = msgInput.value.trim();
+    if (!raw) return;
+    chars = raw.split('');
+    idx = 0;
+    intervalMs = speedToMs(+speedRange.value);
+    paused = false;
+    pauseDot.classList.remove('visible');
+    inputScreen.style.display = 'none';
+    displayScreen.classList.add('active');
+    try { document.documentElement.requestFullscreen?.(); } catch(e) {}
+    showLetter();
+    restartTimer();
+  }
+
+  function showLetter() {
+    const ch = chars[idx];
+    if (ch === ' ') {
+      bigLetter.classList.add('space-char');
+      bigLetter.textContent = '';
+    } else {
+      bigLetter.classList.remove('space-char');
+      bigLetter.textContent = ch.toUpperCase();
+    }
+    bigLetter.classList.remove('flash');
+    void bigLetter.offsetWidth;
+    bigLetter.classList.add('flash');
+    hudCount.textContent = `${idx + 1} / ${chars.length}`;
+    progressBar.style.width = ((idx + 1) / chars.length * 100) + '%';
+  }
+
+  function restartTimer() {
+    clearInterval(timer);
+    timer = setInterval(advance, intervalMs);
+  }
+
+  function advance() {
+    if (paused) return;
+    idx++;
+    if (idx >= chars.length) {
+      clearInterval(timer);
+      bigLetter.classList.remove('space-char');
+      bigLetter.textContent = '✓';
+      bigLetter.style.color = 'var(--accent)';
+      hudCount.textContent = 'done';
+      progressBar.style.width = '100%';
+      return;
+    }
+    showLetter();
+  }
+
+  function retreat() {
+    if (idx > 0) idx--;
+    clearInterval(timer);
+    showLetter();
+    paused = true;
+    pauseDot.classList.add('visible');
+  }
+
+  tapPrev.addEventListener('click', retreat);
+  tapNext.addEventListener('click', () => {
+    if (paused) {
+      paused = false;
+      pauseDot.classList.remove('visible');
+      advance();
+      restartTimer();
+    } else {
+      paused = true;
+      pauseDot.classList.add('visible');
+    }
+  });
+
+  hudExit.addEventListener('click', exitDisplay);
+
+  function exitDisplay() {
+    clearInterval(timer);
+    displayScreen.classList.remove('active');
+    inputScreen.style.display = '';
+    bigLetter.style.color = '';
+    try { document.exitFullscreen?.(); } catch(e) {}
+  }
+
+  document.addEventListener('keydown', e => {
+    if (!displayScreen.classList.contains('active')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ') { tapNext.click(); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { retreat(); e.preventDefault(); }
+    if (e.key === 'Escape') exitDisplay();
+  });
+</script>
+</body>
+</html>
