@@ -210,13 +210,13 @@
   .hud-count {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1rem;
-    color: #333;
+    color: var(--fg); /* Changed from #333 to your off-white variable */
     letter-spacing: 0.1em;
   }
 
   .hud-exit {
     font-size: 0.7rem;
-    color: #2a2a2a;
+    color: var(--fg); /* changed from #2a2a2a to white */
     letter-spacing: 0.15em;
     text-transform: uppercase;
     pointer-events: all;
@@ -328,6 +328,9 @@
   function startDisplay() {
     const raw = msgInput.value.trim();
     if (!raw) return;
+    // Added to reset color to white (the --fg variable) //
+    bigLetter.style.color = 'var(--fg)';
+    // End edit //
     chars = raw.split('');
     idx = 0;
     intervalMs = speedToMs(+speedRange.value);
