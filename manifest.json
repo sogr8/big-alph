@@ -3,7 +3,7 @@
   "short_name": "Big Alph",
   "description": "Display messages one giant letter at a time — perfect for communicating across a room.",
   "start_url": "index.html",
-  "scope": "./",
+  "scope": "/big-alph/",
   "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#0a0a0a",
