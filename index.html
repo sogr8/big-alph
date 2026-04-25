@@ -293,6 +293,7 @@
 <script>
   // Register service worker
   if ('serviceWorker' in navigator) {
+    // MUST use the dot-slash to stay in the /big-alph/ folder //
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 
