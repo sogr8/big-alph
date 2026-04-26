@@ -51,14 +51,12 @@
       "src": "screenshots/screenshot-1-input.png",
       "sizes": "1080x1920",
       "type": "image/png",
-      "form_factor": "narrow",
       "label": "Type your message"
     },
     {
       "src": "screenshots/screenshot-2-display.png",
       "sizes": "1080x1920",
       "type": "image/png",
-      "form_factor": "narrow",
       "label": "Giant letter display"
     }
   ]
