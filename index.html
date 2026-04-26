@@ -12,8 +12,20 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192x192.png">
 <title>Big Alph</title>
+  <!-- Edit to avoid chaining font requests -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400&display=swap" 
+      rel="stylesheet" 
+      media="print" 
+      onload="this.media='all'">
+<noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+</noscript>
+  
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400&display=swap');
+  /* removing the @import which may be causing problems for the pwa builder */
+  /* @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400&display=swap'); */
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
