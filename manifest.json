@@ -2,7 +2,7 @@
   "name": "Big Alph",
   "short_name": "Big Alph",
   "description": "Display messages one giant letter at a time — perfect for communicating across a room.",
-  "id": "/big-alph/",
+  "id": "big-alph",
   "start_url": "/big-alph/",
   "scope": "/big-alph/",
   "display": "fullscreen",
