@@ -1,17 +1,4 @@
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
-});
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(self.clients.claim());
-});
-
-self.addEventListener('fetch', (e) => {
-  // This just passes requests through to the internet without caching
-  e.respondWith(fetch(e.request));
-});
-
-/*
 const CACHE = "big-alph-v1";
 const ASSETS = [
   "./",
@@ -49,4 +36,4 @@ self.addEventListener("fetch", (e) => {
     caches.match(e.request).then((cached) => cached || fetch(e.request)),
   );
 });
-*/
+
